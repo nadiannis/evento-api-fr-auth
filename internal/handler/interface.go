@@ -10,6 +10,7 @@ type CustomerReader interface {
 }
 
 type CustomerWriter interface {
+	Login(c *gin.Context)
 	Add(c *gin.Context)
 	UpdateBalance(c *gin.Context)
 }

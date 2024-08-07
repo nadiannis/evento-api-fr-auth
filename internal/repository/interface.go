@@ -5,6 +5,7 @@ import "github.com/nadiannis/evento-api-fr-auth/internal/domain"
 type CustomerReader interface {
 	GetAll() ([]*domain.Customer, error)
 	GetByID(customerID int64) (*domain.Customer, error)
+	GetByUsername(username string) (*domain.Customer, error)
 }
 
 type CustomerWriter interface {

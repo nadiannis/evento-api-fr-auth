@@ -12,6 +12,7 @@ type CustomerReader interface {
 }
 
 type CustomerWriter interface {
+	Login(input *request.CustomerRequest) (*string, error)
 	Add(input *request.CustomerRequest) (*domain.Customer, error)
 	UpdateBalance(customerID int64, input *request.CustomerBalanceRequest) (*domain.Customer, error)
 }

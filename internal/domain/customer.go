@@ -13,10 +13,7 @@ type Customer struct {
 	Balance  float64  `json:"balance"`
 }
 
-type password struct {
-	Plaintext *string
-	Hash      []byte
-}
+type password []byte
 
 func (p *password) Set(plaintextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plaintextPassword), 12)
@@ -24,14 +21,13 @@ func (p *password) Set(plaintextPassword string) error {
 		return err
 	}
 
-	p.Plaintext = &plaintextPassword
-	p.Hash = hash
+	*p = hash
 
 	return nil
 }
 
 func (p *password) Matches(plaintextPassword string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword(p.Hash, []byte(plaintextPassword))
+	err := bcrypt.CompareHashAndPassword(*p, []byte(plaintextPassword))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):

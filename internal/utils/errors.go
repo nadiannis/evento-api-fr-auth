@@ -24,6 +24,8 @@ var (
 	ErrInsufficientBalance        = errors.New("insufficient balance")
 	ErrInvalidID                  = errors.New("invalid id")
 	ErrInvalidAction              = errors.New("invalid action")
+	ErrInvalidCredentials         = errors.New("invalid authentication credentials")
+	ErrUnknownClaimsType          = errors.New("unknown claims type")
 )
 
 func errorResponse(c *gin.Context, status int, message any) {
@@ -54,4 +56,18 @@ func NotFoundResponse(c *gin.Context, err error) {
 
 func FailedValidationResponse(c *gin.Context, errors map[string]string) {
 	errorResponse(c, http.StatusUnprocessableEntity, errors)
+}
+
+func InvalidCredentialsResponse(c *gin.Context, err error) {
+	errorResponse(c, http.StatusUnauthorized, err.Error())
+}
+
+func InvalidAuthenticationTokenResponse(c *gin.Context, err error) {
+	req := fmt.Sprintf("%s %s %s", c.Request.Proto, c.Request.Method, c.Request.RequestURI)
+	log.Error().Str("request", req).Msg(err.Error())
+
+	c.Header("WWW-Authenticate", "Bearer")
+
+	message := "invalid or missing authentication token"
+	errorResponse(c, http.StatusUnauthorized, message)
 }

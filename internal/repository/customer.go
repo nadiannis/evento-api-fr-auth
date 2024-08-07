@@ -71,7 +71,7 @@ func (r *CustomerRepository) Add(customer *domain.Customer) error {
 		VALUES ($1, $2, $3)
 		RETURNING id
 	`
-	args := []any{customer.Username, customer.Password.Hash, customer.Balance}
+	args := []any{customer.Username, customer.Password, customer.Balance}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -100,7 +100,7 @@ func (r *CustomerRepository) GetByID(customerID int64) (*domain.Customer, error)
 	defer r.mu.Unlock()
 
 	query := `
-		SELECT id, username, balance 
+		SELECT id, username, password_hash, balance 
 		FROM customers 
 		WHERE id = $1
 	`
@@ -119,9 +119,49 @@ func (r *CustomerRepository) GetByID(customerID int64) (*domain.Customer, error)
 	err = stmt.QueryRowContext(ctx, customerID).Scan(
 		&customer.ID,
 		&customer.Username,
+		&customer.Password,
 		&customer.Balance,
 	)
 
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, utils.ErrCustomerNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &customer, nil
+}
+
+func (r *CustomerRepository) GetByUsername(username string) (*domain.Customer, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	query := `
+		SELECT id, username, password_hash, balance
+		FROM customers
+		WHERE username = $1
+	`
+
+	var customer domain.Customer
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRowContext(ctx, username).Scan(
+		&customer.ID,
+		&customer.Username,
+		&customer.Password,
+		&customer.Balance,
+	)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):

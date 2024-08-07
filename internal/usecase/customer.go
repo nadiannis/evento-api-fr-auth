@@ -1,6 +1,11 @@
 package usecase
 
 import (
+	"errors"
+	"strconv"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain/request"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain/response"
@@ -18,6 +23,42 @@ func NewCustomerUsecase(customerRepository repository.ICustomerRepository, order
 		customerRepository: customerRepository,
 		orderRepository:    orderRepository,
 	}
+}
+
+func (u *CustomerUsecase) Login(input *request.CustomerRequest) (*string, error) {
+	customer, err := u.customerRepository.GetByUsername(input.Username)
+	if err != nil {
+		switch {
+		case errors.Is(err, utils.ErrCustomerNotFound):
+			return nil, utils.ErrInvalidCredentials
+		default:
+			return nil, err
+		}
+	}
+
+	match, err := customer.Password.Matches(input.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	if !match {
+		return nil, utils.ErrInvalidCredentials
+	}
+
+	claims := utils.JWTClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   strconv.FormatInt(customer.ID, 10),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "api.evento.com",
+			Audience:  []string{"api.evento.com"},
+		},
+	}
+
+	token, err := utils.GenerateJWTToken(claims)
+
+	return token, err
 }
 
 func (u *CustomerUsecase) GetAll() ([]*response.CustomerResponse, error) {

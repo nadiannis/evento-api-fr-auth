@@ -21,6 +21,7 @@ type config struct {
 
 type application struct {
 	config   config
+	usecases usecase.Usecases
 	handlers handler.Handlers
 }
 
@@ -46,6 +47,7 @@ func main() {
 
 	app := &application{
 		config:   cfg,
+		usecases: usecases,
 		handlers: handlers,
 	}
 

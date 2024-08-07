@@ -1,5 +1,9 @@
 package utils
 
+import "regexp"
+
+var UsernameRX = regexp.MustCompile("^[A-Za-z][A-Za-z0-9_]{2,29}$")
+
 type Validator struct {
 	Errors map[string]string
 }
@@ -24,6 +28,10 @@ func (v *Validator) Check(ok bool, field, message string) {
 	if !ok {
 		v.AddError(field, message)
 	}
+}
+
+func Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
 }
 
 func PermittedValue[T comparable](value T, permittedValues ...T) bool {
