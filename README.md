@@ -26,8 +26,9 @@
 
 [`^ back to top ^`](#table-of-contents)
 
-- View list of customers & their orders.
 - Add a new customer.
+- Authenticate a customer.
+- View list of customers & their orders.
 - View a customer.
 - Change balance amount.
 - View list of events with the tickets available.
@@ -47,6 +48,7 @@ There are 5 entities: **Customer**, **TicketType**, **Event**, **Ticket**, & **O
 
 - id: `int64`
 - username: `string`
+- password: `[]byte`
 - balance: `float64`
 
 **TicketType**
@@ -87,6 +89,7 @@ erDiagram
     Customer {
         int64 id PK
         string username
+        bytea password
         float64 balance
     }
     Ticket }o--|| TicketType : has
@@ -122,18 +125,19 @@ erDiagram
 
 [`^ back to top ^`](#table-of-contents)
 
-| **Method** | **Pattern**                 | **Description**                                 |
-| ---------- | --------------------------- | ----------------------------------------------- |
-| GET        | /api/customers              | View list of customers & their orders.          |
-| POST       | /api/customers              | Add a new customer.                             |
-| GET        | /api/customers/:id          | View a customer.                                |
-| PATCH      | /api/customers/:id/balances | Add balance amount.                             |
-| GET        | /api/events                 | View list of events with the tickets available. |
-| GET        | /api/events/:id             | View an event with the tickets available.       |
-| GET        | /api/tickets                | View list of tickets.                           |
-| GET        | /api/tickets/:id            | View a ticket.                                  |
-| GET        | /api/orders                 | View list of orders.                            |
-| POST       | /api/orders                 | Order a ticket.                                 |
+| **Method** | **Pattern**                   | **Description**                                 |
+| ---------- | ----------------------------- | ----------------------------------------------- |
+| POST       | /api/customers                | Add a new customer.                             |
+| POST       | /api/customers/authentication | Authenticate a customer.                        |
+| GET        | /api/customers                | View list of customers & their orders.          |
+| GET        | /api/customers/:id            | View a customer.                                |
+| PATCH      | /api/customers/:id/balances   | Add balance amount.                             |
+| GET        | /api/events                   | View list of events with the tickets available. |
+| GET        | /api/events/:id               | View an event with the tickets available.       |
+| GET        | /api/tickets                  | View list of tickets.                           |
+| GET        | /api/tickets/:id              | View a ticket.                                  |
+| GET        | /api/orders                   | View list of orders.                            |
+| POST       | /api/orders                   | Order a ticket.                                 |
 
 ## Tech Stack
 
