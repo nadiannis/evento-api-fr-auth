@@ -1,4 +1,10 @@
-DB_DSN = pgx://postgres:pass1234@localhost:5432/eventodb
+include .env
+
+DB_DSN = ${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+ifeq ($(strip $(PORT)),)
+  PORT = 8080
+endif
 
 ## help: list available commands
 .PHONY: help
@@ -13,7 +19,7 @@ confirm:
 ## run: run the application 
 .PHONY: run
 run:
-	go run ./cmd
+	go run ./cmd -port=${PORT} -db-dsn=postgres://${DB_DSN}?sslmode=disable -jwt-secret=${JWT_SECRET}
 
 ## db/migrations/new name=$1: create new database migration files 
 .PHONY: db/migrations/new
@@ -25,13 +31,13 @@ db/migrations/new:
 .PHONY: db/migrations/up
 db/migrations/up: confirm
 	@echo 'Apply all migrations...'
-	migrate -path ./migrations -database ${DB_DSN} up
+	migrate -path ./migrations -database pgx://${DB_DSN} up
 
 ## db/migrations/down: revert all migrations
 .PHONY: db/migrations/down
 db/migrations/down: confirm
 	@echo 'Rollback migrations...'
-	migrate -path ./migrations -database ${DB_DSN} down
+	migrate -path ./migrations -database pgx://${DB_DSN} down
 
 ## audit: tidy dependencies, format code, & vet code
 .PHONY: audit

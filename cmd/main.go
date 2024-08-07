@@ -5,36 +5,29 @@ import (
 	"flag"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/nadiannis/evento-api-fr-auth/internal/config"
 	"github.com/nadiannis/evento-api-fr-auth/internal/handler"
 	"github.com/nadiannis/evento-api-fr-auth/internal/repository"
 	"github.com/nadiannis/evento-api-fr-auth/internal/usecase"
 	"github.com/rs/zerolog/log"
 )
 
-type config struct {
-	port int
-	db   struct {
-		driver string
-		dsn    string
-	}
-}
-
 type application struct {
-	config   config
+	config   *config.Config
 	usecases usecase.Usecases
 	handlers handler.Handlers
 }
 
 func main() {
-	var cfg config
-	cfg.db.driver = "pgx"
+	var cfg config.Config
 
-	flag.IntVar(&cfg.port, "port", 8080, "API server port")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:pass1234@localhost:5432/eventodb", "PostgreSQL data source name")
+	flag.IntVar(&cfg.Port, "port", 8080, "API server port")
+	flag.StringVar(&cfg.DB.DSN, "db-dsn", "", "PostgreSQL data source name")
+	flag.StringVar(&cfg.JWT.Secret, "jwt-secret", "", "JWT secret")
 
 	flag.Parse()
 
-	db, err := openDB(cfg)
+	db, err := openDB(&cfg)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
@@ -42,11 +35,11 @@ func main() {
 	log.Info().Msg("connected to database successfully")
 
 	repos := repository.NewRepositories(db)
-	usecases := usecase.NewUsecases(repos)
+	usecases := usecase.NewUsecases(&cfg, repos)
 	handlers := handler.NewHandlers(usecases)
 
 	app := &application{
-		config:   cfg,
+		config:   &cfg,
 		usecases: usecases,
 		handlers: handlers,
 	}
@@ -63,8 +56,8 @@ func main() {
 	}
 }
 
-func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open(cfg.db.driver, cfg.db.dsn)
+func openDB(cfg *config.Config) (*sql.DB, error) {
+	db, err := sql.Open("pgx", cfg.DB.DSN)
 	if err != nil {
 		return nil, err
 	}

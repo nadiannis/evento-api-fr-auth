@@ -1,6 +1,9 @@
 package usecase
 
-import "github.com/nadiannis/evento-api-fr-auth/internal/repository"
+import (
+	"github.com/nadiannis/evento-api-fr-auth/internal/config"
+	"github.com/nadiannis/evento-api-fr-auth/internal/repository"
+)
 
 type Usecases struct {
 	Customers   ICustomerUsecase
@@ -10,9 +13,9 @@ type Usecases struct {
 	Orders      IOrderUsecase
 }
 
-func NewUsecases(repositories repository.Repositories) Usecases {
+func NewUsecases(config *config.Config, repositories repository.Repositories) Usecases {
 	return Usecases{
-		Customers:   NewCustomerUsecase(repositories.Customers, repositories.Orders),
+		Customers:   NewCustomerUsecase(config, repositories.Customers, repositories.Orders),
 		Events:      NewEventUsecase(repositories.Events, repositories.Tickets),
 		TicketTypes: NewTicketTypeUsecase(repositories.TicketTypes),
 		Tickets:     NewTicketUsecase(repositories.Tickets, repositories.TicketTypes, repositories.Events),

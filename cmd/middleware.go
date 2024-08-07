@@ -63,7 +63,7 @@ func (app *application) Authenticate() gin.HandlerFunc {
 
 		token := headerParts[1]
 
-		claims, err := utils.ValidateJWTToken(token)
+		claims, err := utils.ValidateJWTToken(app.config.JWT.Secret, token)
 		if err != nil {
 			utils.InvalidAuthenticationTokenResponse(c, err)
 			c.Abort()

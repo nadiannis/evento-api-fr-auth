@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/nadiannis/evento-api-fr-auth/internal/config"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain/request"
 	"github.com/nadiannis/evento-api-fr-auth/internal/domain/response"
@@ -14,12 +15,18 @@ import (
 )
 
 type CustomerUsecase struct {
+	config             *config.Config
 	customerRepository repository.ICustomerRepository
 	orderRepository    repository.IOrderRepository
 }
 
-func NewCustomerUsecase(customerRepository repository.ICustomerRepository, orderRepository repository.IOrderRepository) ICustomerUsecase {
+func NewCustomerUsecase(
+	config *config.Config,
+	customerRepository repository.ICustomerRepository,
+	orderRepository repository.IOrderRepository,
+) ICustomerUsecase {
 	return &CustomerUsecase{
+		config:             config,
 		customerRepository: customerRepository,
 		orderRepository:    orderRepository,
 	}
@@ -56,7 +63,7 @@ func (u *CustomerUsecase) Login(input *request.CustomerRequest) (*string, error)
 		},
 	}
 
-	token, err := utils.GenerateJWTToken(claims)
+	token, err := utils.GenerateJWTToken(u.config.JWT.Secret, claims)
 
 	return token, err
 }

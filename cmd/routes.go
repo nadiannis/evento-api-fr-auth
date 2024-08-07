@@ -15,7 +15,7 @@ func (app *application) routes() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.GET("/api", func(c *gin.Context) {
-		message := fmt.Sprintf("API is running on port %d", app.config.port)
+		message := fmt.Sprintf("API is running on port %d", app.config.Port)
 		c.String(http.StatusOK, message)
 		utils.SetLogMessage(c, message)
 	})
