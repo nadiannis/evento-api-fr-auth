@@ -52,7 +52,9 @@ func (h *CustomerHandler) Add(c *gin.Context) {
 	v := utils.NewValidator()
 
 	v.Check(input.Username != "", "username", "username is required")
-	v.Check(input.Balance >= 0, "balance", "balance should not be a negative number")
+	v.Check(input.Password != "", "password", "password is required")
+	v.Check(len(input.Password) >= 8, "password", "password must be at least 8 characters long")
+	v.Check(len(input.Password) <= 72, "password", "password must not be more than 72 characters long")
 
 	if !v.Valid() {
 		utils.FailedValidationResponse(c, v.Errors)

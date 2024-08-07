@@ -67,11 +67,11 @@ func (r *CustomerRepository) Add(customer *domain.Customer) error {
 	defer r.mu.Unlock()
 
 	query := `
-		INSERT INTO customers (username, balance)
-		VALUES ($1, $2)
+		INSERT INTO customers (username, password_hash, balance)
+		VALUES ($1, $2, $3)
 		RETURNING id
 	`
-	args := []any{customer.Username, customer.Balance}
+	args := []any{customer.Username, customer.Password.Hash, customer.Balance}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

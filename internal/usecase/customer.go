@@ -49,10 +49,15 @@ func (u *CustomerUsecase) GetAll() ([]*response.CustomerResponse, error) {
 func (u *CustomerUsecase) Add(input *request.CustomerRequest) (*domain.Customer, error) {
 	customer := &domain.Customer{
 		Username: input.Username,
-		Balance:  input.Balance,
+		Balance:  0,
 	}
 
-	err := u.customerRepository.Add(customer)
+	err := customer.Password.Set(input.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	err = u.customerRepository.Add(customer)
 	if err != nil {
 		return nil, err
 	}
